@@ -42,6 +42,10 @@ export async function POST(request: Request) {
   let updates = {};
 
   switch (action) {
+    case 'init':
+      message = ''; // No message for init
+      break;
+
     case 'explore':
       const encounter = Math.random();
       if (encounter > 0.7) {

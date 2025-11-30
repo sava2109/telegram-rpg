@@ -17,11 +17,14 @@ export default function Home() {
   const { user, isReady, tg } = useTelegram();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [stats, setStats] = useState({ hp: 100, max_hp: 100, gold: 0 });
 
   // Initial welcome message
   useEffect(() => {
     if (isReady && user) {
       addLog(`Welcome, ${user.first_name}! The dungeon awaits.`, 'info');
+      // Fetch initial stats
+      handleAction('init'); 
     } else if (isReady && !user) {
       addLog('Welcome, Traveler! (Running outside Telegram?)', 'info');
     }
@@ -52,11 +55,13 @@ export default function Home() {
           user: user || { id: 12345, first_name: 'TestUser' } // Fallback for testing in browser
         }),
       });
-
-      const data = await response.json();
-
       if (data.error) {
         addLog(data.error, 'error');
+      } else {
+        if (data.message) addLog(data.message, data.type);
+        if (data.userStats) {
+          setStats(data.userStats);
+        }
       } else {
         addLog(data.message, data.type);
         // TODO: Update stats in UI based on data.userStats
@@ -75,10 +80,10 @@ export default function Home() {
       <div className="bg-rpg-panel p-4 border-b border-gray-700 flex justify-between items-center">
         <div className="flex flex-col">
           <span className="font-bold text-lg">{user?.first_name || 'Hero'}</span>
-          <span className="text-xs text-gray-400">Lvl 1 Warrior</span>
-        </div>
         <div className="flex gap-4">
-          <div className="text-red-500 font-bold">HP: 100/100</div>
+          <div className="text-red-500 font-bold">HP: {stats.hp}/{stats.max_hp}</div>
+          <div className="text-rpg-accent font-bold">Gold: {stats.gold}</div>
+        </div> className="text-red-500 font-bold">HP: 100/100</div>
           <div className="text-rpg-accent font-bold">Gold: 0</div>
         </div>
       </div>
